@@ -1,0 +1,14 @@
+{
+  "common": {
+    "retry": "Retry"
+  },
+  "home": {
+    "title": "Starter",
+    "tagline": "A ready-to-build Next.js app."
+  },
+  "health": {
+    "title": "API status",
+    "online": "{service} v{version} — database {database}",
+    "error": "Unable to reach the API. Is the backend running?"
+  }
+}

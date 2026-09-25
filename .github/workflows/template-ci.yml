@@ -1,0 +1,32 @@
+name: Template CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  variants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [expo, nuxt, next]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialise variant
+        run: ./scripts/init.sh ${{ matrix.variant }} starter-test
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Checks
+        run: |
+          case "${{ matrix.variant }}" in
+            expo) pnpm exec tsc --noEmit && pnpm exec expo lint && pnpm exec expo export --platform web ;;
+            *) pnpm typecheck && pnpm lint && pnpm build ;;
+          esac

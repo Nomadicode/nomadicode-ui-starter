@@ -1,0 +1,18 @@
+import type en from "./en";
+
+const esCO: typeof en = {
+  common: {
+    retry: "Reintentar",
+  },
+  home: {
+    title: "Starter",
+    tagline: "Un punto de partida listo para construir con Expo.",
+  },
+  health: {
+    title: "Estado de la API",
+    online: "{{service}} v{{version}} — base de datos {{database}}",
+    error: "No se pudo conectar con la API. ¿Está en marcha el servidor?",
+  },
+};
+
+export default esCO;
