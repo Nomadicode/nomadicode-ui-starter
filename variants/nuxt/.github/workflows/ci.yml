@@ -6,6 +6,9 @@ on:
   push:
     branches: [main, dev, develop, development]
 
+permissions:
+  contents: read
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -21,4 +24,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
-      - run: pnpm build
+      - run: pnpm generate

@@ -36,6 +36,21 @@ URL prefix.
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm preview   # Worker build on workerd
 ```
 
 Read `AGENTS.md` before letting an AI agent edit this variant: Next 16 differs from older versions.
+
+## Analytics
+
+`instrumentation-client.ts` starts PostHog in the browser (pageviews on every route change,
+exceptions autocaptured). Import `posthog` from `posthog-js` in client components to capture events.
+`NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` unset = analytics off.
+
+## Deployment
+
+Pages render on a Cloudflare Worker through [OpenNext](https://opennext.js.org/cloudflare)
+(`wrangler.jsonc`, `open-next.config.ts`). After CI passes on `main`, **Deploy production web** builds
+with the Infisical Prod › `/web` values and runs `pnpm run deploy`; Wrangler creates the Worker on the
+first run. `pnpm preview` runs the Worker build locally. Next is held at 16.3.x until OpenNext
+supports 16.4. First-time setup: [Production setup](#production-setup).

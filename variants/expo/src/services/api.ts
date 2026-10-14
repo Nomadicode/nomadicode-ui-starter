@@ -31,18 +31,26 @@ function transformKeys(
   return data;
 }
 
+export function toCamelCaseKeys(data: unknown): unknown {
+  return transformKeys(data, toCamelCase);
+}
+
+export function toSnakeCaseKeys(data: unknown): unknown {
+  return transformKeys(data, toSnakeCase);
+}
+
 export const api = create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
 });
 
 api.interceptors.request.use((config) => {
   if (config.data) {
-    config.data = transformKeys(config.data, toSnakeCase);
+    config.data = toSnakeCaseKeys(config.data);
   }
   return config;
 });
 
 api.interceptors.response.use((response) => {
-  response.data = transformKeys(response.data, toCamelCase);
+  response.data = toCamelCaseKeys(response.data);
   return response;
 });

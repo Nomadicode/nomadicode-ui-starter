@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  compatibilityDate: '2025-01-01',
+  compatibilityDate: '2026-10-01',
   css: ['~/assets/css/tailwind.css'],
   modules: ['shadcn-nuxt', '@nuxtjs/i18n', '@pinia/nuxt', '@nuxt/eslint'],
   vite: {
@@ -14,6 +14,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiUrl: 'http://localhost:8000',
+      posthogProjectToken: '',
+      posthogHost: 'https://us.i.posthog.com',
     },
   },
   i18n: {

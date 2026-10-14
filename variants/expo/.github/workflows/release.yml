@@ -1,0 +1,70 @@
+name: Release native production app
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Store target
+        required: true
+        type: choice
+        options: [android, ios]
+
+concurrency:
+  group: release-native-production-${{ inputs.platform }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load configuration from Infisical
+        # Every key in <project> › Prod › /app becomes a masked env var for the steps below.
+        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+        with:
+          method: oidc
+          identity-id: 56f46eef-7eb8-4559-89ab-0e7b307e819a # github-actions-deploy
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: prod
+          secret-path: /app
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck && pnpm test:ci
+      - name: Load deploy credentials from Infisical
+        # <project> › Prod › /ci, loaded after the tests: EXPO_TOKEN.
+        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+        with:
+          method: oidc
+          identity-id: 56f46eef-7eb8-4559-89ab-0e7b307e819a # github-actions-deploy
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: prod
+          secret-path: /ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ env.EXPO_TOKEN }}
+      - name: Push Infisical settings to the EAS production environment
+        # `eas build --environment production` reads EAS's own variables, so mirror every
+        # loaded EXPO_PUBLIC_* key there first.
+        run: |
+          for key in $(compgen -e | grep '^EXPO_PUBLIC_'); do
+            [ -n "${!key}" ] || continue
+            eas env:create --environment production --name "$key" --value "${!key}" \
+              --visibility plaintext --force --non-interactive > /dev/null
+            echo "EAS production: $key"
+          done
+      - name: Build and submit to the selected store
+        run: >-
+          eas build --platform "${{ inputs.platform }}" --profile production
+          --environment production --non-interactive --auto-submit

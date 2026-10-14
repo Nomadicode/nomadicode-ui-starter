@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   variants:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Initialise variant
-        run: ./scripts/init.sh ${{ matrix.variant }} starter-test
+        run: ./scripts/init.sh ${{ matrix.variant }} starter-test --repo Nomadicode/starter-test-ui
       - uses: pnpm/action-setup@v4
         with:
           version: 11
@@ -27,6 +30,9 @@ jobs:
       - name: Checks
         run: |
           case "${{ matrix.variant }}" in
-            expo) pnpm exec tsc --noEmit && pnpm exec expo lint && pnpm exec expo export --platform web ;;
+            expo) pnpm typecheck && pnpm lint && pnpm test:ci && pnpm export:web ;;
+            nuxt) pnpm typecheck && pnpm lint && pnpm generate ;;
             *) pnpm typecheck && pnpm lint && pnpm build ;;
           esac
+      - name: Setup guide has no unresolved placeholders
+        run: "! grep -nE '__[A-Z_]+__|<!-- /?variant' README.md"

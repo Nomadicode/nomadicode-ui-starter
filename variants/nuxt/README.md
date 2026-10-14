@@ -33,5 +33,17 @@ comes from the `i18n_locale` cookie, then the browser language (any Spanish reso
 ```bash
 pnpm typecheck
 pnpm lint
-pnpm build
+pnpm generate
 ```
+
+## Analytics
+
+`app/plugins/posthog.client.ts` starts PostHog in the browser (pageviews on every route change,
+exceptions autocaptured). Capture events with `useNuxtApp().$posthog?.capture(...)`.
+`NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN` unset = analytics off.
+
+## Deployment
+
+The site is statically generated (`pnpm generate` → `.output/public`). After CI passes on `main`,
+**Deploy production web** builds it with the Infisical Prod › `/web` values and publishes it to the
+Cloudflare Pages project nomadicode-infra created. First-time setup: [Production setup](#production-setup).
